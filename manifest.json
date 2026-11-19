@@ -1,0 +1,12 @@
+{
+  "name": "Morya Balrugnaly",
+  "short_name": "Morya Hospital",
+  "description": "Morya Balrugnaly Hospital App",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#1264ad",
+  "lang": "mr"
+}
