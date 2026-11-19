@@ -62,5 +62,58 @@ if ("serviceWorker" in navigator) {
   });
 }
   </script>
+  <div id="admin-login" style="max-width:400px;margin:30px auto;padding:20px;background:#fff;border:1px solid #ddd;border-radius:12px;">
+  <h2>Admin Login</h2>
+  <input id="admin-email" type="email" placeholder="Admin Email"
+    style="width:100%;padding:12px;margin:8px 0;box-sizing:border-box;">
+  <input id="admin-password" type="password" placeholder="Password"
+    style="width:100%;padding:12px;margin:8px 0;box-sizing:border-box;">
+  <button id="admin-login-btn"
+    style="width:100%;padding:12px;background:#1264ad;color:white;border:0;border-radius:8px;">
+    Login
+  </button>
+  <p id="login-message"></p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const supabaseClient = window.supabase.createClient(
+  "https://tooasuhbojiirfijlmbo.supabase.co",
+  "sb_publishable_KyZypp4nwmb8NlXyjhBOLw_HBYXGNRF"
+);
+
+document.getElementById("admin-login-btn").onclick = async () => {
+  const email = document.getElementById("admin-email").value;
+  const password = document.getElementById("admin-password").value;
+  const message = document.getElementById("login-message");
+
+  message.textContent = "Checking login...";
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    message.textContent = "Login failed: " + error.message;
+    return;
+  }
+
+  const { data: roleData, error: roleError } =
+    await supabaseClient
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", data.user.id)
+      .single();
+
+  if (roleError || roleData.role !== "admin") {
+    await supabaseClient.auth.signOut();
+    message.textContent = "Admin permission not found.";
+    return;
+  }
+
+  message.textContent = "Admin Login Successful!";
+};
+</script>
 </body>
 </html>
