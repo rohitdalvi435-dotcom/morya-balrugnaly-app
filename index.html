@@ -72,6 +72,10 @@ if ("serviceWorker" in navigator) {
     style="width:100%;padding:12px;background:#1264ad;color:white;border:0;border-radius:8px;">
     Login
   </button>
+    <button id="forgot-password-btn"
+  style="width:100%;padding:12px;margin-top:10px;background:#fff;color:#1264ad;border:1px solid #1264ad;border-radius:8px;">
+  Forgot Password?
+    </button>
   <p id="login-message"></p>
 </div>
 
@@ -81,7 +85,28 @@ const supabaseClient = window.supabase.createClient(
   "https://tooasuhbojiirfijlmbo.supabase.co",
   "sb_publishable_KyZypp4nwmb8NlXyjhBOLw_HBYXGNRF"
 );
+document.getElementById("forgot-password-btn").onclick = async () => {
+  const email = document.getElementById("admin-email").value.trim();
+  const message = document.getElementById("login-message");
 
+  if (!email) {
+    message.textContent = "Please enter your admin email first.";
+    return;
+  }
+
+  message.textContent = "Sending reset email...";
+
+  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+    redirectTo: "https://rohitdalvi435-dotcom.github.io/morya-balrugnaly-app/"
+  });
+
+  if (error) {
+    message.textContent = error.message;
+    return;
+  }
+
+  message.textContent = "Reset email sent. Check Gmail.";
+};
 document.getElementById("admin-login-btn").onclick = async () => {
   const email = document.getElementById("admin-email").value;
   const password = document.getElementById("admin-password").value;
