@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="manifest.json">
 <title>Morya Balrugnaly</title>
 <style>
 *{box-sizing:border-box}
@@ -54,5 +55,12 @@ footer{text-align:center;padding:20px;color:#71849a;font-size:13px}
 </main>
 
 <footer>© Morya Balrugnaly</footer>
+  <script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js");
+  });
+}
+  </script>
 </body>
 </html>
