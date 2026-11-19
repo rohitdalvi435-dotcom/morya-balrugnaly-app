@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="mr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="manifest" href="manifest.json">
+<link rel="manifest" href="manifest.json">
 <title>Morya Balrugnaly</title>
 <style>
 *{box-sizing:border-box}
@@ -20,6 +21,10 @@ h2{font-size:19px;margin-top:24px}
 .card b{font-size:15px}
 .note{font-size:12px;color:#63788c;line-height:1.5;margin-top:22px}
 footer{text-align:center;padding:20px;color:#71849a;font-size:13px}
+.panel{max-width:400px;margin:30px auto;padding:20px;background:white;border:1px solid #ddd;border-radius:12px}
+.panel input{width:100%;padding:12px;margin:8px 0}
+.panel button{width:100%;padding:12px;margin-top:10px;background:#1264ad;color:white;border:0;border-radius:8px}
+#reset-password-box{display:none}
 </style>
 </head>
 <body>
@@ -50,69 +55,71 @@ footer{text-align:center;padding:20px;color:#71849a;font-size:13px}
 <b>Morya Balrugnaly</b>
 <p>Jamkhed, Ahilyanagar, Maharashtra - 413201</p>
 </div>
-
-<p class="note">टीप: ही सुरुवातीची डिझाइन आहे. रुग्णांची खरी माहिती, OTP, बिलिंग आणि वैद्यकीय रेकॉर्ड सुरक्षित Backend तयार झाल्यावरच जोडले जातील.</p>
+<p class="note">टीप: ही सुरुवातीची डिझाइन आहे. रुग्णांची खरी माहिती सुरक्षित Backend तयार झाल्यावरच जोडली जाईल.</p>
 </main>
 
 <footer>© Morya Balrugnaly</footer>
-  <script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js");
-  });
-}
-  </script>
-  <div id="admin-login" style="max-width:400px;margin:30px auto;padding:20px;background:#fff;border:1px solid #ddd;border-radius:12px;">
-  <h2>Admin Login</h2>
-  <input id="admin-email" type="email" placeholder="Admin Email"
-    style="width:100%;padding:12px;margin:8px 0;box-sizing:border-box;">
-  <input id="admin-password" type="password" placeholder="Password"
-    style="width:100%;padding:12px;margin:8px 0;box-sizing:border-box;">
-  <button id="admin-login-btn"
-    style="width:100%;padding:12px;background:#1264ad;color:white;border:0;border-radius:8px;">
-    Login
-  </button>
-    <button id="forgot-password-btn"
-  style="width:100%;padding:12px;margin-top:10px;background:#fff;color:#1264ad;border:1px solid #1264ad;border-radius:8px;">
-  Forgot Password?
-    </button>
-  <p id="login-message"></p>
+
+<div id="admin-login" class="panel">
+<h2>Admin Login</h2>
+<input id="admin-email" type="email" placeholder="Admin Email">
+<input id="admin-password" type="password" placeholder="Password">
+<button id="admin-login-btn">Login</button>
+<button id="forgot-password-btn" style="background:white;color:#1264ad;border:1px solid #1264ad">Forgot Password?</button>
+<p id="login-message"></p>
+</div>
+
+<div id="reset-password-box" class="panel">
+<h2>Reset Admin Password</h2>
+<input id="new-password" type="password" placeholder="New Password">
+<input id="confirm-password" type="password" placeholder="Confirm New Password">
+<button id="save-new-password">Update Password</button>
+<p id="reset-message"></p>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const supabaseClient = window.supabase.createClient(
-  "https://tooasuhbojiirfijlmbo.supabase.co",
-  "sb_publishable_KyZypp4nwmb8NlXyjhBOLw_HBYXGNRF"
+"https://tooasuhbojiirfijlmbo.supabase.co",
+"sb_publishable_KyZypp4nwmb8NlXyjhBOLw_HBYXGNRF",
+{
+  auth: {
+    flowType: "implicit",
+    detectSessionInUrl: true,
+    persistSession: true,
+    autoRefreshToken: true
+  }
+}
 );
+
+const loginMessage = document.getElementById("login-message");
+const resetBox = document.getElementById("reset-password-box");
+const resetMessage = document.getElementById("reset-message");
+
 document.getElementById("forgot-password-btn").onclick = async () => {
   const email = document.getElementById("admin-email").value.trim();
-  const message = document.getElementById("login-message");
 
   if (!email) {
-    message.textContent = "Please enter your admin email first.";
+    loginMessage.textContent = "Please enter your admin email first.";
     return;
   }
 
-  message.textContent = "Sending reset email...";
+  loginMessage.textContent = "Sending reset email...";
 
   const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
     redirectTo: "https://rohitdalvi435-dotcom.github.io/morya-balrugnaly-app/"
   });
 
-  if (error) {
-    message.textContent = error.message;
-    return;
-  }
-
-  message.textContent = "Reset email sent. Check Gmail.";
+  loginMessage.textContent = error
+    ? error.message
+    : "Reset email sent. Check Gmail.";
 };
-document.getElementById("admin-login-btn").onclick = async () => {
-  const email = document.getElementById("admin-email").value;
-  const password = document.getElementById("admin-password").value;
-  const message = document.getElementById("login-message");
 
-  message.textContent = "Checking login...";
+document.getElementById("admin-login-btn").onclick = async () => {
+  const email = document.getElementById("admin-email").value.trim();
+  const password = document.getElementById("admin-password").value;
+
+  loginMessage.textContent = "Checking login...";
 
   const { data, error } = await supabaseClient.auth.signInWithPassword({
     email,
@@ -120,112 +127,87 @@ document.getElementById("admin-login-btn").onclick = async () => {
   });
 
   if (error) {
-    message.textContent = "Login failed: " + error.message;
+    loginMessage.textContent = "Login failed: " + error.message;
     return;
   }
 
-  const { data: roleData, error: roleError } =
-    await supabaseClient
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", data.user.id)
-      .single();
+  const { data: isAdmin, error: roleError } =
+    await supabaseClient.rpc("is_admin");
 
-  if (roleError || roleData.role !== "admin") {
+  if (roleError) {
+    loginMessage.textContent = "Admin check error: " + roleError.message;
+    return;
+  }
+
+  if (isAdmin !== true) {
     await supabaseClient.auth.signOut();
-    message.textContent = "Admin permission not found.";
+    loginMessage.textContent = "This account does not have admin permission.";
     return;
   }
 
-  message.textContent = "Admin Login Successful!";
+  loginMessage.textContent = "Admin Login Successful!";
 };
-</script>
- 
-<!-- PASSWORD RESET FORM -->
-<div id="reset-password-box" style="display:none;max-width:400px;margin:30px auto;padding:20px;background:white;border:1px solid #ddd;border-radius:12px;">
-  <h2>Reset Admin Password</h2>
 
-  <input
-    id="new-password"
-    type="password"
-    placeholder="New Password"
-    style="width:100%;padding:12px;margin:10px 0;box-sizing:border-box;"
-  >
+function showResetForm() {
+  resetBox.style.display = "block";
+  document.getElementById("admin-login").style.display = "none";
+}
 
-  <input
-    id="confirm-password"
-    type="password"
-    placeholder="Confirm New Password"
-    style="width:100%;padding:12px;margin:10px 0;box-sizing:border-box;"
-  >
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  if (event === "PASSWORD_RECOVERY" && session) {
+    showResetForm();
+  }
+});
 
-  <button
-    id="save-new-password"
-    style="width:100%;padding:12px;background:#1264ad;color:white;border:0;border-radius:8px;"
-  >
-    Update Password
-  </button>
+(async function checkRecovery() {
+  if (!window.location.hash.includes("type=recovery")) return;
 
-  <p id="reset-message"></p>
-</div>
+  showResetForm();
 
-<script>
-(async function () {
-  const box = document.getElementById("reset-password-box");
-  const message = document.getElementById("reset-message");
-
-  const hash = window.location.hash;
-  const isRecovery = hash.includes("type=recovery");
-
-  if (!isRecovery) return;
-
-  box.style.display = "block";
-
-  const { data, error } =
-    await supabaseClient.auth.getSession();
+  const { data, error } = await supabaseClient.auth.getSession();
 
   if (error || !data.session) {
-    message.textContent =
+    resetMessage.textContent =
       "Reset link invalid or expired. Please request a new link.";
+  }
+})();
+
+document.getElementById("save-new-password").onclick = async () => {
+  const password = document.getElementById("new-password").value;
+  const confirm = document.getElementById("confirm-password").value;
+
+  if (password.length < 8) {
+    resetMessage.textContent = "Password must be at least 8 characters.";
     return;
   }
 
-  document.getElementById("save-new-password").onclick =
-    async function () {
-      const password =
-        document.getElementById("new-password").value;
+  if (password !== confirm) {
+    resetMessage.textContent = "Passwords do not match.";
+    return;
+  }
 
-      const confirm =
-        document.getElementById("confirm-password").value;
+  resetMessage.textContent = "Updating password...";
 
-      if (password.length < 8) {
-        message.textContent =
-          "Password must be at least 8 characters.";
-        return;
-      }
+  const { error } = await supabaseClient.auth.updateUser({
+    password: password
+  });
 
-      if (password !== confirm) {
-        message.textContent = "Passwords do not match.";
-        return;
-      }
+  if (error) {
+    resetMessage.textContent = error.message;
+    return;
+  }
 
-      message.textContent = "Updating password...";
+  resetMessage.textContent =
+    "Password updated successfully! Please login again.";
 
-      const { error } =
-        await supabaseClient.auth.updateUser({
-          password: password
-        });
+  await supabaseClient.auth.signOut();
+};
 
-      if (error) {
-        message.textContent = error.message;
-        return;
-      }
-
-      message.textContent =
-        "Password updated successfully! Please login again.";
-    };
-})();
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js");
+  });
+}
 </script>
-  
 </body>
 </html>
